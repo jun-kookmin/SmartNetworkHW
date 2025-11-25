@@ -702,7 +702,22 @@ class App(tk.Tk):
 
     # ---------------- Ryu SFC (REST) ----------------
     def _build_sfc(self):
-        top = ttk.Frame(self.pg_sfc, padding=8); top.pack(fill="x")
+        # -------------------- TODO 박스 추가 영역 --------------------
+        top_info = ttk.Frame(self.pg_sfc, padding=8)
+        top_info.pack(fill="x")
+
+        todo_text = (
+            "[TODO] SFC 설치 (REST POST /stats/flowentry/add)\n"
+            "[TODO] 바이패스 설치\n"
+            "[TODO] 플로우 조회 (GET /stats/flow/<dpid>)\n"
+            "[TODO] 플로우 삭제 (DELETE /stats/flowentry/clear/<dpid>)"
+        )
+
+        ttk.Label(top_info, text=todo_text, justify="left").pack(anchor="w")
+        # ------------------------------------------------------------
+
+        top = ttk.Frame(self.pg_sfc, padding=8)
+        top.pack(fill="x")
 
         self.var_rest_host = tk.StringVar(value="127.0.0.1")
         self.var_rest_port = tk.StringVar(value="8080")
@@ -724,12 +739,14 @@ class App(tk.Tk):
         ttk.Label(top, text="prio").grid(row=0, column=6, sticky="e")
         ttk.Entry(top, textvariable=self.var_prio, width=6).grid(row=0, column=7)
 
-        ports = ttk.Frame(self.pg_sfc, padding=8); ports.pack(fill="x")
+        ports = ttk.Frame(self.pg_sfc, padding=8)
+        ports.pack(fill="x")
         for i,(lab,var) in enumerate([("h1",self.var_h1),("fw",self.var_fw),("nat",self.var_nat),("h2",self.var_h2)]):
             ttk.Label(ports, text=lab).grid(row=0, column=i*2)
             ttk.Entry(ports, textvariable=var, width=6).grid(row=0, column=i*2+1, padx=4)
 
-        btns = ttk.Frame(self.pg_sfc, padding=8); btns.pack(fill="x")
+        btns = ttk.Frame(self.pg_sfc, padding=8)
+        btns.pack(fill="x")
         ttk.Button(btns, text="SFC 설치", command=self.sfc_install).pack(side="left", padx=4)
         ttk.Button(btns, text="바이패스", command=self.sfc_bypass).pack(side="left", padx=4)
         ttk.Button(btns, text="플로우 조회", command=self.sfc_dump).pack(side="left", padx=4)
@@ -737,14 +754,6 @@ class App(tk.Tk):
 
         self.out_sfc = scrolledtext.ScrolledText(self.pg_sfc, height=24)
         self.out_sfc.pack(fill="both", expand=True, padx=8, pady=8)
-
-    def log_sfc(self, s): self._append(self.out_sfc, s)
-
-    def _ryu_base(self) -> str:
-        host = self.var_rest_host.get().strip()
-        port = safe_int(self.var_rest_port.get(), 8080)
-        return f"http://{host}:{port}"
-    
     # ---- SFC 스켈레톤 핸들러 ----
     def sfc_install(self):
         if requests is None:
