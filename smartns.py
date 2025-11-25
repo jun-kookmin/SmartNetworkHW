@@ -752,6 +752,15 @@ class App(tk.Tk):
 
         self.out_sfc = scrolledtext.ScrolledText(self.pg_sfc, height=24)
         self.out_sfc.pack(fill="both", expand=True, padx=8, pady=8)
+
+    def log_sfc(self, s: str):
+        self._append(self.out_sfc, s)
+
+    def _ryu_base(self) -> str:
+        host = self.var_rest_host.get().strip()
+        port = safe_int(self.var_rest_port.get().strip(), 8080)
+        return f"http://{host}:{port}"
+    
     # ---- SFC 스켈레톤 핸들러 ----
     def sfc_install(self):
         if requests is None:
