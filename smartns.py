@@ -702,7 +702,6 @@ class App(tk.Tk):
 
     # ---------------- Ryu SFC (REST) ----------------
     def _build_sfc(self):
-        # -------------------- TODO 박스 추가 영역 --------------------
         top_info = ttk.Frame(self.pg_sfc, padding=8)
         top_info.pack(fill="x")
 
@@ -714,7 +713,6 @@ class App(tk.Tk):
         )
 
         ttk.Label(top_info, text=todo_text, justify="left").pack(anchor="w")
-        # ------------------------------------------------------------
 
         top = ttk.Frame(self.pg_sfc, padding=8)
         top.pack(fill="x")
