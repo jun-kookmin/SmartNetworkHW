@@ -8,6 +8,7 @@
 # 모든 설명은 Window 환경을 기준으로 한다.
 ```bash
 # (권장) 가상환경
+# LTS 20.04 버전 권장,  LTS 22.04 호환, LTS 24.04 호환 x 
 # Ryu SFC 를 위한 우분투 가상 환경
 # Ubuntu를 활용 Ubuntu shell 창에 code . 으로 vsc 진입
 
@@ -30,7 +31,7 @@ sudo util/install.sh -a
 sudo mkdir -p /var/run/openvswitch
 sudo mkdir -p /etc/openvswitch
 
-sudo ovsdb-tool create /etc/openvswitch/conf.db/usr/share/openvswitch/vswitch.ovsschema
+sudo ovsdb-tool create /etc/openvswitch/conf.db /usr/share/openvswitch/vswitch.ovsschema
 sudo ovsdb-server --remote=punix:/var/run/openvswitch/db.sock --remote=db:Open_vSwitch,Open_vSwitch,manager_options --pidfile --detach
 
 sudo ovs-vswitchd --pidfile --detach
