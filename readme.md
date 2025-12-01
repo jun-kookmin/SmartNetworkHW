@@ -5,7 +5,7 @@
 ## 김도경	20203034
 
 ## 실행 방법
-# 모든 설명은 Window 환경을 기준으로 한다.
+# 모든 설명은 Window 환경을 기준으로 한다. 우분투 환경 실행은 하단에
 ```bash
 # (권장) 가상환경
 # LTS 20.04 버전 권장,  LTS 22.04 호환, LTS 24.04 호환 x 
@@ -53,3 +53,18 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo single,4 --switch ovsk
 README에 16개 요구사항을 위 매핑처럼 체크리스트 표로 정리
 
 스크린샷(각 탭) + 실행 방법(OS별) + 테스트 절차(포트 검사, 전송 모드 비교)
+
+#----------------------------------------------------------------
+## 우분투 환경 실행
+
+sudo apt update
+pip3 install ryu
+
+git clone https://github.com/mininet/mininet
+cd mininet
+sudo util/install.sh -a
+
+python3.8 -m ryu.cmd.manager --ofp-tcp-listen-port 6633 --wsapi-port 9090 ryu.app.simple_switch_13
+# 다른 터미널 
+sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo single,3 --switch ovsk
+
