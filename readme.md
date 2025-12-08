@@ -44,7 +44,8 @@ curl http://127.0.0.1:8080/stats/flow/1 // 된건지 확인용
 ## 김도경	20203034
 
 ## 실행 방법
-```bash
+```
+## bash
 # (권장) 가상환경
 python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
@@ -52,6 +53,7 @@ source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install requests
 
 python smart_net_suite.py
+
 
 ## smartns.py 요구사항 매핑 체크리스트
 | # | 요구 기능 | UI/버튼/탭 매핑 (smartns.py) | 상태 |
