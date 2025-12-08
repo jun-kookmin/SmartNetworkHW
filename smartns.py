@@ -25,7 +25,6 @@ def is_windows() -> bool:
     return os.name == "nt"
 
 def run_cmd(cmd: List[str], timeout: float = 5.0) -> str:
-    """OS 명령 실행. 에러도 stdout로 회수."""
     try:
         p = subprocess.run(
             cmd,
@@ -34,25 +33,22 @@ def run_cmd(cmd: List[str], timeout: float = 5.0) -> str:
             timeout=timeout,
             shell=False
         )
-        out = (p.stdout or "") + (p.stderr or "")
-        return out.strip()
+        return (p.stdout or "") + (p.stderr or "")
     except Exception as e:
         return f"[cmd error] {e}"
 
 def safe_int(s: str, default: int = 0) -> int:
     try:
         return int(s)
-    except Exception:
+    except:
         return default
 
 def pad_fixed(data: bytes, n: int) -> bytes:
-    """FIXED 전송용 정확히 n바이트로 맞춤."""
     if len(data) > n:
         return data[:n]
-    return data + b'\x00' * (n - len(data))
+    return data + b"\x00" * (n - len(data))
 
 def recv_exact(sock: socket.socket, n: int) -> bytes:
-    """정확히 n바이트 수신(고정 길이)."""
     buf = b""
     while len(buf) < n:
         chunk = sock.recv(n - len(buf))
@@ -61,8 +57,7 @@ def recv_exact(sock: socket.socket, n: int) -> bytes:
         buf += chunk
     return buf
 
-def recv_until_newline(sock: socket.socket, max_bytes: int = 65536) -> bytes:
-    """\\n까지 수신(가변 길이)."""
+def recv_until_newline(sock: socket.socket, max_bytes=65536) -> bytes:
     buf = b""
     while True:
         b1 = sock.recv(1)
@@ -75,6 +70,7 @@ def recv_until_newline(sock: socket.socket, max_bytes: int = 65536) -> bytes:
             raise ValueError("too large message")
     return buf
 
+
 @dataclass
 class ClientConn:
     sock: socket.socket
@@ -82,29 +78,31 @@ class ClientConn:
     thread: threading.Thread
 
 
-# ----------------- GUI App -----------------
+# ----------------- GUI -----------------
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("스마트 네트워크 서비스 — A+ 완성본")
-        self.geometry("1100x720")
+        self.title("스마트 네트워크 서비스")
+        self.geometry("1180x780")
 
         self.server_running = False
         self.client_connected = False
 
-        self.server_sock: Optional[socket.socket] = None
-        self.server_thread: Optional[threading.Thread] = None
+        self.server_sock = None
+        self.server_thread = None
         self.server_stop_event = threading.Event()
         self.server_lock = threading.Lock()
         self.server_clients: List[ClientConn] = []
         self.server_counter = 0
 
-        self.client_sock: Optional[socket.socket] = None
-        self.client_recv_thread: Optional[threading.Thread] = None
+        self.client_sock = None
+        self.client_recv_thread = None
         self.client_stop_event = threading.Event()
-        
-        self.draw_send_queue: "queue.Queue[bytes]" = queue.Queue()
 
+        self.draw_send_queue = queue.Queue()
+
+        # Notebook
         nb = ttk.Notebook(self)
         nb.pack(fill="both", expand=True)
 
@@ -124,7 +122,7 @@ class App(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
-    # ---------------- 네트워크 진단 ----------------
+    # ------------------- 네트워크 진단 -------------------
     def _build_diag(self):
         left = ttk.Frame(self.pg_diag, padding=8); left.pack(side="left", fill="y")
         right = ttk.Frame(self.pg_diag, padding=8); right.pack(side="right", fill="both", expand=True)
@@ -133,184 +131,181 @@ class App(tk.Tk):
         ttk.Button(left, text="IP 구성 확인", command=self.do_ipconfig).pack(fill="x", pady=2)
 
         self.var_netstat = tk.StringVar(value="9000")
-        row = ttk.Frame(left); row.pack(fill="x", pady=2)
+        row = ttk.Frame(left); row.pack(fill="x")
         ttk.Entry(row, textvariable=self.var_netstat, width=10).pack(side="left")
         ttk.Button(row, text="netstat 필터", command=self.do_netstat).pack(side="left", padx=4)
 
-        row2 = ttk.Frame(left); row2.pack(fill="x", pady=(6,2))
+        row2 = ttk.Frame(left); row2.pack(fill="x", pady=4)
         self.var_host = tk.StringVar(value="127.0.0.1")
         self.var_port = tk.StringVar(value="9000")
         ttk.Entry(row2, textvariable=self.var_host, width=14).pack(side="left")
         ttk.Entry(row2, textvariable=self.var_port, width=6).pack(side="left", padx=4)
-        ttk.Button(row2, text="포트 오픈 검사", command=self.do_check_port).pack(side="left", padx=4)
+        ttk.Button(row2, text="포트 검사", command=self.do_check_port).pack(side="left", padx=4)
 
-        ttk.Separator(left).pack(fill="x", pady=8)
+        ttk.Separator(left).pack(fill="x", pady=6)
         ttk.Label(left, text="바이트/주소 변환").pack(anchor="w")
         ttk.Button(left, text="hton/ntoh 데모", command=self.do_hton).pack(fill="x", pady=2)
 
         self.var_ipv4 = tk.StringVar(value="8.8.8.8")
         self.var_ipv6 = tk.StringVar(value="2001:4860:4860::8888")
 
-        row3 = ttk.Frame(left); row3.pack(fill="x", pady=2)
+        row3 = ttk.Frame(left); row3.pack(fill="x")
         ttk.Entry(row3, textvariable=self.var_ipv4, width=18).pack(side="left")
-        ttk.Button(row3, text="inet_pton/ntop(IPv4)", command=self.do_inet4).pack(side="left", padx=4)
+        ttk.Button(row3, text="IPv4 변환", command=self.do_inet4).pack(side="left", padx=4)
 
-        row4 = ttk.Frame(left); row4.pack(fill="x", pady=2)
+        row4 = ttk.Frame(left); row4.pack(fill="x")
         ttk.Entry(row4, textvariable=self.var_ipv6, width=26).pack(side="left")
-        ttk.Button(row4, text="inet_pton/ntop(IPv6)", command=self.do_inet6).pack(side="left", padx=4)
+        ttk.Button(row4, text="IPv6 변환", command=self.do_inet6).pack(side="left", padx=4)
 
-        ttk.Separator(left).pack(fill="x", pady=8)
-        ttk.Label(left, text="DNS/이름 변환").pack(anchor="w")
+        ttk.Separator(left).pack(fill="x", pady=6)
+        ttk.Label(left, text="DNS/역방향 조회").pack(anchor="w")
+
         self.var_dns = tk.StringVar(value="example.com")
         self.var_rev = tk.StringVar(value="8.8.8.8")
 
-        row5 = ttk.Frame(left); row5.pack(fill="x", pady=2)
+        row5 = ttk.Frame(left); row5.pack(fill="x")
         ttk.Entry(row5, textvariable=self.var_dns, width=18).pack(side="left")
         ttk.Button(row5, text="DNS 조회", command=self.do_dns).pack(side="left", padx=4)
 
-        row6 = ttk.Frame(left); row6.pack(fill="x", pady=2)
+        row6 = ttk.Frame(left); row6.pack(fill="x")
         ttk.Entry(row6, textvariable=self.var_rev, width=18).pack(side="left")
         ttk.Button(row6, text="역방향 조회", command=self.do_reverse).pack(side="left", padx=4)
 
         self.out_diag = scrolledtext.ScrolledText(right, height=30)
         self.out_diag.pack(fill="both", expand=True)
 
-    def log_diag(self, s): self._append(self.out_diag, s)
+    def log_diag(self, s):
+        self._append(self.out_diag, s)
 
-    # ifconfig/ipconfig
     def do_ipconfig(self):
         self.log_diag("[IP 구성 확인]")
         if is_windows():
-            out = run_cmd(["ipconfig", "/all"], timeout=6)
-        else: # mac/linux: ifconfig
+            self.log_diag(run_cmd(["ipconfig", "/all"], timeout=6))
+        else:
             out = run_cmd(["ifconfig"], timeout=6)
-            if "not found" in out.lower() or out.strip() == "":
+            if not out.strip():
                 out = run_cmd(["ip", "a"], timeout=6)
-        self.log_diag(out)
+            self.log_diag(out)
 
-    # netstat -a -n -p tcp | findstr/grep <port>
     def do_netstat(self):
         port = self.var_netstat.get().strip()
-        self.log_diag(f"[netstat 필터] port={port}")
+        self.log_diag("[netstat]")
         if is_windows():
-            cmd = ["netstat", "-a", "-n", "-p", "tcp"]
-            out = run_cmd(cmd, timeout=5)
-            filtered = "\n".join([line for line in out.splitlines() if port in line])
+            out = run_cmd(["netstat", "-a", "-n", "-p", "tcp"])
         else:
-            cmd = ["netstat", "-anp", "tcp"]
-            out = run_cmd(cmd, timeout=5)
-            if "illegal" in out.lower() or "not supported" in out.lower():
-                out = run_cmd(["netstat", "-an"], timeout=5)
-            filtered = "\n".join([line for line in out.splitlines() if port in line])
+            out = run_cmd(["netstat", "-anp", "tcp"])
+            if "illegal" in out.lower():
+                out = run_cmd(["netstat", "-an"])
+        filtered = "\n".join([line for line in out.splitlines() if port in line])
         self.log_diag(filtered if filtered else "(no match)")
 
-    # 포트 오픈 여부 검사
     def do_check_port(self):
         host = self.var_host.get().strip()
-        port = safe_int(self.var_port.get().strip(), 0)
-        self.log_diag(f"[포트 오픈 검사] {host}:{port}")
+        port = safe_int(self.var_port.get(), 0)
         try:
-            with socket.create_connection((host, port), timeout=2.0) as s:
-                self.log_diag("OPEN (연결 성공)")
+            with socket.create_connection((host, port), timeout=2):
+                self.log_diag("OPEN")
         except Exception as e:
-            self.log_diag(f"CLOSED or FILTERED: {e}")
+            self.log_diag(f"CLOSED: {e}")
 
-    # 바이트 정렬 / host<->network
     def do_hton(self):
-        self.log_diag("[hton/ntoh 데모]")
+        self.log_diag("[hton/ntoh]")
         x16 = 0x1234
         x32 = 0x12345678
         x64 = 0x1122334455667788
-
         n16 = socket.htons(x16)
         h16 = socket.ntohs(n16)
-
         n32 = socket.htonl(x32)
         h32 = socket.ntohl(n32)
-
         n64 = struct.unpack("!Q", struct.pack("@Q", x64))[0]
         h64 = struct.unpack("@Q", struct.pack("!Q", n64))[0]
+        self.log_diag(f"16bit {hex(x16)} -> {hex(n16)} -> {hex(h16)}")
+        self.log_diag(f"32bit {hex(x32)} -> {hex(n32)} -> {hex(h32)}")
+        self.log_diag(f"64bit {hex(x64)} -> {hex(n64)} -> {hex(h64)}")
 
-        self.log_diag(f"16-bit host={hex(x16)} -> network={hex(n16)} -> host={hex(h16)}")
-        self.log_diag(f"32-bit host={hex(x32)} -> network={hex(n32)} -> host={hex(h32)}")
-        self.log_diag(f"64-bit host={hex(x64)} -> network={hex(n64)} -> host={hex(h64)}")
-
-    # inet_pton/ntop IPv4
     def do_inet4(self):
-        ip = self.var_ipv4.get().strip()
-        self.log_diag(f"[inet_pton/ntop IPv4] {ip}")
         try:
-            packed = socket.inet_pton(socket.AF_INET, ip)
-            self.log_diag(f"packed={packed} len={len(packed)}")
-            unpacked = socket.inet_ntop(socket.AF_INET, packed)
-            self.log_diag(f"unpacked={unpacked}")
+            ip = self.var_ipv4.get().strip()
+            p = socket.inet_pton(socket.AF_INET, ip)
+            u = socket.inet_ntop(socket.AF_INET, p)
+            self.log_diag(f"packed={p}, unpacked={u}")
         except Exception as e:
-            self.log_diag(f"error: {e}")
+            self.log_diag(str(e))
 
-    # inet_pton/ntop IPv6
     def do_inet6(self):
-        ip = self.var_ipv6.get().strip()
-        self.log_diag(f"[inet_pton/ntop IPv6] {ip}")
         try:
-            packed = socket.inet_pton(socket.AF_INET6, ip)
-            self.log_diag(f"packed={packed} len={len(packed)}")
-            unpacked = socket.inet_ntop(socket.AF_INET6, packed)
-            self.log_diag(f"unpacked={unpacked}")
+            ip = self.var_ipv6.get().strip()
+            p = socket.inet_pton(socket.AF_INET6, ip)
+            u = socket.inet_ntop(socket.AF_INET6, p)
+            self.log_diag(f"packed={p}, unpacked={u}")
         except Exception as e:
-            self.log_diag(f"error: {e}")
+            self.log_diag(str(e))
 
-    # DNS 조회
     def do_dns(self):
         host = self.var_dns.get().strip()
-        self.log_diag(f"[DNS 조회] {host}")
+        self.log_diag(f"[DNS] {host}")
         try:
             infos = socket.getaddrinfo(host, None)
             addrs = sorted(set([i[4][0] for i in infos]))
             for a in addrs:
-                self.log_diag(f" - {a}")
+                self.log_diag(a)
         except Exception as e:
-            self.log_diag(f"error: {e}")
+            self.log_diag(str(e))
 
-    # 역방향 이름 조회
     def do_reverse(self):
         ip = self.var_rev.get().strip()
-        self.log_diag(f"[역방향 조회] {ip}")
         try:
             name, alias, addr = socket.gethostbyaddr(ip)
             self.log_diag(f"name={name}")
-            if alias: self.log_diag(f"alias={alias}")
-            self.log_diag(f"addr_list={addr}")
+            self.log_diag(f"alias={alias}")
+            self.log_diag(f"addr={addr}")
         except Exception as e:
-            self.log_diag(f"error: {e}")
+            self.log_diag(str(e))
 
-    # ---------------- TCP 서버 ----------------
+    # ------------------- TCP 서버 -------------------
+
     def _build_server(self):
         top = ttk.Frame(self.pg_server, padding=8); top.pack(fill="x")
-        self.var_srv_port = tk.StringVar(value="9000")
-
         ttk.Label(top, text="포트").pack(side="left")
+        self.var_srv_port = tk.StringVar(value="9000")
         ttk.Entry(top, textvariable=self.var_srv_port, width=6).pack(side="left", padx=4)
 
         self.var_broadcast = tk.BooleanVar(value=True)
-        ttk.Checkbutton(top, text="그림판 브로드캐스트", variable=self.var_broadcast).pack(side="left", padx=6)
+        ttk.Checkbutton(top, text="그림판 브로드캐스트", variable=self.var_broadcast).pack(side="left", padx=4)
 
         ttk.Button(top, text="서버 시작", command=self.server_start).pack(side="left", padx=4)
         ttk.Button(top, text="서버 정지", command=self.server_stop).pack(side="left", padx=4)
 
-        stat = ttk.Frame(self.pg_server, padding=8); stat.pack(fill="x")
+        stat = ttk.Frame(self.pg_server, padding=6); stat.pack(fill="x")
         self.lbl_clients = ttk.Label(stat, text="접속: 0"); self.lbl_clients.pack(side="left")
         self.lbl_counter = ttk.Label(stat, text="카운터: 0"); self.lbl_counter.pack(side="left", padx=12)
-        ttk.Button(stat, text="상태 갱신", command=self.server_status).pack(side="left")
+        ttk.Button(stat, text="갱신", command=self.server_status).pack(side="left")
 
-        self.out_srv = scrolledtext.ScrolledText(self.pg_server, height=28)
+        # ---------------------- 클라이언트 리스트 테이블 추가 ----------------------
+        tbl_frame = ttk.LabelFrame(self.pg_server, text="접속 클라이언트 목록", padding=4)
+        tbl_frame.pack(fill="both", expand=False, padx=6, pady=6)
+
+        self.tbl_clients = ttk.Treeview(tbl_frame, columns=("addr"), show="headings", height=5)
+        self.tbl_clients.heading("addr", text="주소 (IP:Port)")
+        self.tbl_clients.column("addr", width=250)
+        self.tbl_clients.pack(fill="x", expand=True, padx=4, pady=4)
+
+        # 로그창
+        self.out_srv = scrolledtext.ScrolledText(self.pg_server, height=22)
         self.out_srv.pack(fill="both", expand=True)
 
-    def log_srv(self, s): self._append(self.out_srv, s)
+    def update_client_table(self):
+        for row in self.tbl_clients.get_children():
+            self.tbl_clients.delete(row)
+        with self.server_lock:
+            for c in self.server_clients:
+                self.tbl_clients.insert("", "end", values=(f"{c.addr[0]}:{c.addr[1]}",))
 
-    # 멀티스레드 서버 + Lock+Event 안전정지
+    def log_srv(self, s):
+        self._append(self.out_srv, s)
+
     def server_start(self):
         if self.server_running:
-            messagebox.showinfo("서버", "이미 실행 중")
             return
 
         port = safe_int(self.var_srv_port.get(), 9000)
@@ -323,22 +318,23 @@ class App(tk.Tk):
             srv.listen(20)
             self.server_sock = srv
         except Exception as e:
-            messagebox.showerror("서버 시작 실패", str(e))
+            messagebox.showerror("서버 실패", str(e))
             return
 
         self.server_running = True
-        self.log_srv(f"[서버] 시작 @ {port}")
+        self.log_srv(f"[서버 시작] {port}")
+
         self.server_thread = threading.Thread(target=self._server_accept_loop, daemon=True)
         self.server_thread.start()
 
         threading.Thread(target=self._server_draw_broadcast_loop, daemon=True).start()
 
     def _server_accept_loop(self):
-        assert self.server_sock is not None
+        srv = self.server_sock
         while not self.server_stop_event.is_set():
             try:
-                self.server_sock.settimeout(1.0)
-                cli, addr = self.server_sock.accept()
+                srv.settimeout(1.0)
+                cli, addr = srv.accept()
             except socket.timeout:
                 continue
             except Exception:
@@ -346,34 +342,34 @@ class App(tk.Tk):
 
             th = threading.Thread(target=self._server_client_loop, args=(cli, addr), daemon=True)
             conn = ClientConn(sock=cli, addr=addr, thread=th)
+
             with self.server_lock:
                 self.server_clients.append(conn)
+
             th.start()
-
-            self.log_srv(f"[서버] 접속 {addr} (총 {len(self.server_clients)})")
+            self.log_srv(f"[접속] {addr}")
+            self.update_client_table()
             self.server_status()
-
-        self.log_srv("[서버] accept 루프 종료")
 
     def _server_client_loop(self, cli: socket.socket, addr):
         cli.settimeout(1.0)
         try:
             while not self.server_stop_event.is_set():
                 try:
-                    mode_b = cli.recv(1)
-                    if not mode_b:
+                    mode = cli.recv(1)
+                    if not mode:
                         break
-                    mode = mode_b.decode(errors="ignore")
+                    mode = mode.decode()
 
                     if mode == "V":
                         data = recv_until_newline(cli)
-                        msg = data.decode(errors="ignore").rstrip("\n")
+                        msg = data.decode().rstrip("\n")
                         self._server_on_message(addr, f"VAR '{msg}'")
                         cli.sendall(b"V" + data)
 
                     elif mode == "F":
                         data = recv_exact(cli, 32)
-                        msg = data.rstrip(b"\x00").decode(errors="ignore")
+                        msg = data.rstrip(b"\x00").decode()
                         self._server_on_message(addr, f"FIXED '{msg}'")
                         cli.sendall(b"F" + data)
 
@@ -381,8 +377,8 @@ class App(tk.Tk):
                         hdr = recv_exact(cli, 4)
                         n = struct.unpack("!I", hdr)[0]
                         payload = recv_exact(cli, n)
-                        msg = payload.decode(errors="ignore")
-                        self._server_on_message(addr, f"MIX '{msg}' (len={n})")
+                        msg = payload.decode()
+                        self._server_on_message(addr, f"MIX '{msg}' len={n}")
                         cli.sendall(b"M" + hdr + payload)
 
                     elif mode == "D":
@@ -390,87 +386,82 @@ class App(tk.Tk):
                         if self.var_broadcast.get():
                             self.draw_send_queue.put(payload)
                         self._server_on_message(addr, "DRAW event")
+
                     else:
-                        self._server_on_message(addr, f"UNKNOWN mode={mode}")
+                        self._server_on_message(addr, f"UNKNOWN={mode}")
 
                 except socket.timeout:
                     continue
 
         except Exception as e:
-            self.log_srv(f"[서버] {addr} 오류: {e}")
+            self.log_srv(f"[오류] {addr}: {e}")
 
         finally:
-            try:
-                cli.close()
-            except Exception:
-                pass
+            cli.close()
             with self.server_lock:
                 self.server_clients = [c for c in self.server_clients if c.addr != addr]
-            self.log_srv(f"[서버] 해제 {addr} (총 {len(self.server_clients)})")
+
+            self.log_srv(f"[해제] {addr}")
+            self.update_client_table()
             self.server_status()
 
     def _server_on_message(self, addr, text):
-        # 공유 카운터+Lock
         with self.server_lock:
             self.server_counter += 1
-            count = self.server_counter
-        self.log_srv(f"[서버][{addr}] {text} | counter={count}")
+            c = self.server_counter
+        self.log_srv(f"[{addr}] {text} | counter={c}")
 
     def _server_draw_broadcast_loop(self):
         while not self.server_stop_event.is_set():
             try:
-                payload = self.draw_send_queue.get(timeout=1.0)
+                payload = self.draw_send_queue.get(timeout=1)
             except queue.Empty:
                 continue
 
+            dead = []
             with self.server_lock:
-                dead = []
                 for c in self.server_clients:
                     try:
                         c.sock.sendall(b"D" + payload)
-                    except Exception:
+                    except:
                         dead.append(c.addr)
 
                 if dead:
-                    self.server_clients = [c for c in self.server_clients if c.addr not in dead]
+                    self.server_clients = [x for x in self.server_clients if x.addr not in dead]
+
+            self.update_client_table()
 
     def server_stop(self):
         if not self.server_running:
             return
-        self.log_srv("[서버] 정지 요청")
         self.server_stop_event.set()
-
-        # 소켓 닫기
         try:
-            if self.server_sock:
-                self.server_sock.close()
-        except Exception:
+            self.server_sock.close()
+        except:
             pass
 
-        # 클라 소켓 닫기
         with self.server_lock:
             for c in self.server_clients:
-                try:
-                    c.sock.close()
-                except Exception:
-                    pass
+                try: c.sock.close()
+                except: pass
             self.server_clients.clear()
 
         self.server_running = False
+        self.update_client_table()
         self.server_status()
-        self.log_srv("[서버] 정지 완료")
+        self.log_srv("[서버 정지 완료]")
 
     def server_status(self):
         with self.server_lock:
-            n_cli = len(self.server_clients)
+            n = len(self.server_clients)
             cnt = self.server_counter
-        self.lbl_clients.config(text=f"접속: {n_cli}")
+        self.lbl_clients.config(text=f"접속: {n}")
         self.lbl_counter.config(text=f"카운터: {cnt}")
 
-    # ---------------- TCP 클라이언트 ----------------
+    # ------------------- TCP 클라이언트 -------------------
+
     def _build_client(self):
         top = ttk.Frame(self.pg_client, padding=8); top.pack(fill="x")
-
         self.var_cli_host = tk.StringVar(value="127.0.0.1")
         self.var_cli_port = tk.StringVar(value="9000")
 
@@ -485,111 +476,109 @@ class App(tk.Tk):
         opt = ttk.Frame(self.pg_client, padding=8); opt.pack(fill="x")
         self.var_mode = tk.StringVar(value="VAR")
         ttk.Radiobutton(opt, text="VAR(\\n)", variable=self.var_mode, value="VAR").pack(side="left")
-        ttk.Radiobutton(opt, text="FIXED(32B)", variable=self.var_mode, value="FIXED").pack(side="left", padx=6)
-        ttk.Radiobutton(opt, text="MIX(4B len+data)", variable=self.var_mode, value="MIX").pack(side="left", padx=6)
+        ttk.Radiobutton(opt, text="FIXED(32B)", variable=self.var_mode, value="FIXED").pack(side="left", padx=4)
+        ttk.Radiobutton(opt, text="MIX", variable=self.var_mode, value="MIX").pack(side="left", padx=4)
 
         self.var_after_close = tk.BooleanVar(value=False)
-        ttk.Checkbutton(opt, text="전송 후 종료", variable=self.var_after_close).pack(side="left", padx=8)
+        ttk.Checkbutton(opt, text="전송 후 종료", variable=self.var_after_close).pack(side="left")
 
         msg = ttk.Frame(self.pg_client, padding=8); msg.pack(fill="x")
         self.var_msg = tk.StringVar(value="hello")
         ttk.Entry(msg, textvariable=self.var_msg, width=60).pack(side="left")
-        ttk.Button(msg, text="전송", command=self.cli_send).pack(side="left", padx=6)
+        ttk.Button(msg, text="전송", command=self.cli_send).pack(side="left", padx=4)
 
         self.out_cli = scrolledtext.ScrolledText(self.pg_client, height=28)
         self.out_cli.pack(fill="both", expand=True)
 
-    def log_cli(self, s): self._append(self.out_cli, s)
+    def log_cli(self, s):
+        self._append(self.out_cli, s)
 
-    # connect, recv 스레드
     def cli_connect(self):
         if self.client_connected:
             return
+
         host = self.var_cli_host.get().strip()
-        port = safe_int(self.var_cli_port.get().strip(), 9000)
+        port = safe_int(self.var_cli_port.get(), 9000)
 
         try:
-            self.client_sock = socket.create_connection((host, port), timeout=3.0)
-            self.client_sock.settimeout(1.0)
+            self.client_sock = socket.create_connection((host, port), timeout=3)
+            self.client_sock.settimeout(1)
         except Exception as e:
-            messagebox.showerror("클라 연결 실패", str(e))
+            messagebox.showerror("연결 실패", str(e))
             return
 
         self.client_connected = True
-        self.log_cli(f"[클라] 연결 성공 → {host}:{port}")
+        self.log_cli(f"[연결됨] {host}:{port}")
 
         self.client_stop_event.clear()
         self.client_recv_thread = threading.Thread(target=self._cli_recv_loop, daemon=True)
         self.client_recv_thread.start()
 
     def _cli_recv_loop(self):
-        assert self.client_sock is not None
         sock = self.client_sock
         try:
             while not self.client_stop_event.is_set():
                 try:
-                    mode_b = sock.recv(1)
-                    if not mode_b:
+                    mode = sock.recv(1)
+                    if not mode:
                         break
-                    mode = mode_b.decode(errors="ignore")
+                    mode = mode.decode()
 
                     if mode == "V":
                         data = recv_until_newline(sock)
-                        msg = data.decode(errors="ignore").rstrip("\n")
-                        self.log_cli(f"[클라][수신 VAR] '{msg}'")
+                        msg = data.decode().rstrip("\n")
+                        self.log_cli(f"[VAR] {msg}")
 
                     elif mode == "F":
                         data = recv_exact(sock, 32)
-                        msg = data.rstrip(b"\x00").decode(errors="ignore")
-                        self.log_cli(f"[클라][수신 FIXED] '{msg}'")
+                        msg = data.rstrip(b"\x00").decode()
+                        self.log_cli(f"[FIXED] {msg}")
 
                     elif mode == "M":
                         hdr = recv_exact(sock, 4)
                         n = struct.unpack("!I", hdr)[0]
                         payload = recv_exact(sock, n)
-                        msg = payload.decode(errors="ignore")
-                        self.log_cli(f"[클라][수신 MIX] '{msg}' (len={n})")
+                        msg = payload.decode()
+                        self.log_cli(f"[MIX] {msg}")
 
                     elif mode == "D":
                         payload = recv_exact(sock, 16)
                         x1, y1, x2, y2 = struct.unpack("!IIII", payload)
                         self._draw_remote_line(x1, y1, x2, y2)
-                    else:
-                        self.log_cli(f"[클라][수신] UNKNOWN mode={mode}")
 
                 except socket.timeout:
                     continue
+
         except Exception as e:
-            self.log_cli(f"[클라] recv 오류: {e}")
+            self.log_cli(f"[오류] {e}")
+
         finally:
-            self.log_cli("[클라] recv 루프 종료")
+            self.log_cli("[수신 종료]")
             self._cli_cleanup()
 
     def _cli_cleanup(self):
-        if self.client_sock:
-            try:
+        try:
+            if self.client_sock:
                 self.client_sock.close()
-            except Exception:
-                pass
+        except:
+            pass
         self.client_sock = None
         self.client_connected = False
 
     def cli_close(self):
         if not self.client_connected:
             return
-        self.log_cli("[클라] 연결 해제 요청")
         self.client_stop_event.set()
         try:
             if self.client_sock:
                 self.client_sock.close()
-        except Exception:
+        except:
             pass
         self.client_connected = False
+        self.log_cli("[연결 해제]")
 
-    # 전송후종료
     def cli_send(self):
         if not self.client_connected or not self.client_sock:
-            messagebox.showinfo("클라", "먼저 접속하세요")
             return
 
         mode = self.var_mode.get()
@@ -598,32 +587,24 @@ class App(tk.Tk):
 
         try:
             if mode == "VAR":
-                payload = data + b"\n"
-                self.client_sock.sendall(b"V" + payload)
-                self.log_cli(f"[클라][송신 VAR] '{msg}'")
-
+                self.client_sock.sendall(b"V" + data + b"\n")
             elif mode == "FIXED":
-                payload = pad_fixed(data, 32)
-                self.client_sock.sendall(b"F" + payload)
-                self.log_cli(f"[클라][송신 FIXED] '{msg}' (padded to 32B)")
-
+                self.client_sock.sendall(b"F" + pad_fixed(data, 32))
             elif mode == "MIX":
                 hdr = struct.pack("!I", len(data))
                 self.client_sock.sendall(b"M" + hdr + data)
-                self.log_cli(f"[클라][송신 MIX] '{msg}' len={len(data)}")
 
-            else:
-                self.log_cli(f"[클라] unknown mode: {mode}")
+            self.log_cli(f"[송신] {msg}")
 
             if self.var_after_close.get():
-                self.log_cli("[클라] 전송 후 종료 체크 → close")
                 self.cli_close()
 
         except Exception as e:
-            self.log_cli(f"[클라] send 오류: {e}")
+            self.log_cli(f"[오류] {e}")
             self.cli_close()
 
-    # ---------------- 버퍼/소켓 ----------------
+    # ------------------- 버퍼/소켓 -------------------
+
     def _build_buf(self):
         top = ttk.Frame(self.pg_buf, padding=8); top.pack(fill="x")
         ttk.Button(top, text="클라 소켓 버퍼 조회", command=self.buf_client).pack(side="left", padx=4)
@@ -634,19 +615,18 @@ class App(tk.Tk):
 
     def log_buf(self, s): self._append(self.out_buf, s)
 
-    # 클라 소켓 버퍼 상태 표시
     def buf_client(self):
-        self.log_buf("[버퍼] 클라이언트 소켓 버퍼 조회")
-        if not self.client_sock:
-            self.log_buf("클라 소켓 없음 (먼저 접속)")
-            return
-        try:
-            snd = self.client_sock.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
-            rcv = self.client_sock.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
-            self.log_buf(f"SO_SNDBUF={snd} bytes")
-            self.log_buf(f"SO_RCVBUF={rcv} bytes")
-        except Exception as e:
-            self.log_buf(f"error: {e}")
+            self.log_buf("[버퍼] 클라이언트 소켓 버퍼 조회")
+            if not self.client_sock:
+                self.log_buf("클라 소켓 없음 (먼저 접속)")
+                return
+            try:
+                snd = self.client_sock.getsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF)
+                rcv = self.client_sock.getsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF)
+                self.log_buf(f"SO_SNDBUF={snd} bytes")
+                self.log_buf(f"SO_RCVBUF={rcv} bytes")
+            except Exception as e:
+                self.log_buf(f"error: {e}")
 
     # 소켓 버퍼 보기
     def buf_temp(self):
@@ -661,10 +641,11 @@ class App(tk.Tk):
         except Exception as e:
             self.log_buf(f"error: {e}")
 
-    # ---------------- 네트워크 그림판 ----------------
+
+    # ------------------- 그림판 -------------------
+
     def _build_draw(self):
-        info = ttk.Frame(self.pg_draw, padding=8); info.pack(fill="x")
-        ttk.Label(info, text="그림판 — 드래그 시 선, 서버가 브로드캐스트").pack(side="left")
+        ttk.Label(self.pg_draw, text="그림판 — 드래그 시 선, 서버가 브로드캐스트 ").pack(anchor="w", padx=8, pady=4)
 
         self.canvas = tk.Canvas(self.pg_draw, bg="white", height=520)
         self.canvas.pack(fill="both", expand=True, padx=8, pady=8)
@@ -673,47 +654,33 @@ class App(tk.Tk):
         self.canvas.bind("<B1-Motion>", self._draw_move)
         self._last_xy = None
 
-    # 드로잉
     def _draw_start(self, e):
         self._last_xy = (e.x, e.y)
 
     def _draw_move(self, e):
-        if not self._last_xy: 
+        if not self._last_xy:
             return
         x1, y1 = self._last_xy
         x2, y2 = e.x, e.y
         self.canvas.create_line(x1, y1, x2, y2)
 
-        # 네트워크 동기화
         if self.client_connected and self.client_sock:
             try:
                 payload = struct.pack("!IIII", x1, y1, x2, y2)
                 self.client_sock.sendall(b"D" + payload)
-            except Exception:
+            except:
                 pass
 
         self._last_xy = (x2, y2)
 
-    # 원격 드로잉(수신)
     def _draw_remote_line(self, x1, y1, x2, y2):
         def draw():
             self.canvas.create_line(x1, y1, x2, y2)
         self.after(0, draw)
 
-    # ---------------- Ryu SFC (REST) ----------------
+    # ------------------- Ryu SFC -------------------
+
     def _build_sfc(self):
-        top_info = ttk.Frame(self.pg_sfc, padding=8)
-        top_info.pack(fill="x")
-
-        todo_text = (
-            "[TODO] SFC 설치 (REST POST /stats/flowentry/add)\n"
-            "[TODO] 바이패스 설치\n"
-            "[TODO] 플로우 조회 (GET /stats/flow/<dpid>)\n"
-            "[TODO] 플로우 삭제 (DELETE /stats/flowentry/clear/<dpid>)"
-        )
-
-        ttk.Label(top_info, text=todo_text, justify="left").pack(anchor="w")
-
         top = ttk.Frame(self.pg_sfc, padding=8)
         top.pack(fill="x")
 
@@ -726,22 +693,22 @@ class App(tk.Tk):
         self.var_nat = tk.StringVar(value="3")
         self.var_h2 = tk.StringVar(value="4")
 
-        ttk.Label(top, text="Ryu").grid(row=0, column=0, sticky="e")
+        ttk.Label(top, text="REST").grid(row=0, column=0)
         ttk.Entry(top, textvariable=self.var_rest_host, width=14).grid(row=0, column=1)
         ttk.Label(top, text=":").grid(row=0, column=2)
-        ttk.Entry(top, textvariable=self.var_rest_port, width=6).grid(row=0, column=3, padx=4)
+        ttk.Entry(top, textvariable=self.var_rest_port, width=6).grid(row=0, column=3)
 
-        ttk.Label(top, text="DPID").grid(row=0, column=4, sticky="e")
+        ttk.Label(top, text="DPID").grid(row=0, column=4)
         ttk.Entry(top, textvariable=self.var_dpid, width=6).grid(row=0, column=5)
 
-        ttk.Label(top, text="prio").grid(row=0, column=6, sticky="e")
+        ttk.Label(top, text="prio").grid(row=0, column=6)
         ttk.Entry(top, textvariable=self.var_prio, width=6).grid(row=0, column=7)
 
-        ports = ttk.Frame(self.pg_sfc, padding=8)
+        ports = ttk.Frame(self.pg_sfc, padding=6)
         ports.pack(fill="x")
-        for i,(lab,var) in enumerate([("h1",self.var_h1),("fw",self.var_fw),("nat",self.var_nat),("h2",self.var_h2)]):
-            ttk.Label(ports, text=lab).grid(row=0, column=i*2)
-            ttk.Entry(ports, textvariable=var, width=6).grid(row=0, column=i*2+1, padx=4)
+        for i, (label, var) in enumerate([("h1", self.var_h1), ("fw", self.var_fw), ("nat", self.var_nat), ("h2", self.var_h2)]):
+            ttk.Label(ports, text=label).grid(row=0, column=i * 2)
+            ttk.Entry(ports, textvariable=var, width=6).grid(row=0, column=i * 2 + 1, padx=4)
 
         btns = ttk.Frame(self.pg_sfc, padding=8)
         btns.pack(fill="x")
@@ -750,31 +717,43 @@ class App(tk.Tk):
         ttk.Button(btns, text="플로우 조회", command=self.sfc_dump).pack(side="left", padx=4)
         ttk.Button(btns, text="플로우 삭제", command=self.sfc_clear).pack(side="left", padx=4)
 
-        self.out_sfc = scrolledtext.ScrolledText(self.pg_sfc, height=24)
-        self.out_sfc.pack(fill="both", expand=True, padx=8, pady=8)
+        # ----------- 테이블 시각화 추가 -------------
+        tbl_frame = ttk.LabelFrame(self.pg_sfc, text="SFC Flow Entries", padding=6)
+        tbl_frame.pack(fill="both", expand=False, padx=6, pady=6)
 
-    def log_sfc(self, s: str):
+        self.tbl_sfc = ttk.Treeview(tbl_frame, columns=("prio", "match", "actions"), show="headings", height=8)
+        self.tbl_sfc.heading("prio", text="Priority")
+        self.tbl_sfc.heading("match", text="Match")
+        self.tbl_sfc.heading("actions", text="Actions")
+
+        self.tbl_sfc.column("prio", width=80)
+        self.tbl_sfc.column("match", width=300)
+        self.tbl_sfc.column("actions", width=300)
+
+        self.tbl_sfc.pack(fill="x", expand=False)
+
+        self.out_sfc = scrolledtext.ScrolledText(self.pg_sfc, height=18)
+        self.out_sfc.pack(fill="both", expand=True)
+
+    def log_sfc(self, s):
         self._append(self.out_sfc, s)
 
-    def _ryu_base(self) -> str:
+    def _ryu_base(self):
         host = self.var_rest_host.get().strip()
-        port = safe_int(self.var_rest_port.get().strip(), 8080)
+        port = safe_int(self.var_rest_port.get(), 8080)
         return f"http://{host}:{port}"
-    
-    # ---- SFC 스켈레톤 핸들러 ----
+
     def sfc_install(self):
         if requests is None:
-            self.log_sfc("requests 모듈 없음 → pip install requests")
+            self.log_sfc("requests 모듈 없음")
             return
 
         dpid = safe_int(self.var_dpid.get(), 1)
         prio = safe_int(self.var_prio.get(), 100)
-
         h1 = safe_int(self.var_h1.get(), 1)
         fw = safe_int(self.var_fw.get(), 2)
         nat = safe_int(self.var_nat.get(), 3)
         h2 = safe_int(self.var_h2.get(), 4)
-
 
         flows = [
             self._flow_add(dpid, prio, h1, fw),
@@ -782,22 +761,17 @@ class App(tk.Tk):
             self._flow_add(dpid, prio, nat, h2),
         ]
 
-        base = self._ryu_base()
-        url = base + "/stats/flowentry/add"
-        self.log_sfc(f"[SFC 설치] POST {url}")
-
+        url = self._ryu_base() + "/stats/flowentry/add"
         for f in flows:
             try:
                 r = requests.post(url, json=f, timeout=3)
-                self.log_sfc(f"→ {f['match']} / actions={f['actions']} / status={r.status_code}")
-                if r.text:
-                    self.log_sfc(r.text.strip())
+                self.log_sfc(f"ADD match={f['match']} actions={f['actions']}")
             except Exception as e:
-                self.log_sfc(f"error: {e}")
+                self.log_sfc(str(e))
 
     def sfc_bypass(self):
         if requests is None:
-            self.log_sfc("requests 모듈 없음 → pip install requests")
+            self.log_sfc("requests 없음")
             return
 
         dpid = safe_int(self.var_dpid.get(), 1)
@@ -806,65 +780,74 @@ class App(tk.Tk):
         h2 = safe_int(self.var_h2.get(), 4)
 
         flow = self._flow_add(dpid, prio, h1, h2)
-        base = self._ryu_base()
-        url = base + "/stats/flowentry/add"
-        self.log_sfc(f"[바이패스] POST {url}")
 
+        url = self._ryu_base() + "/stats/flowentry/add"
         try:
             r = requests.post(url, json=flow, timeout=3)
-            self.log_sfc(f"→ {flow['match']} / actions={flow['actions']} / status={r.status_code}")
-            if r.text:
-                self.log_sfc(r.text.strip())
+            self.log_sfc(f"BYPASS: {flow}")
         except Exception as e:
-            self.log_sfc(f"error: {e}")
+            self.log_sfc(str(e))
 
     def sfc_dump(self):
         if requests is None:
-            self.log_sfc("requests 모듈 없음 → pip install requests")
+            self.log_sfc("requests 없음")
             return
 
         dpid = safe_int(self.var_dpid.get(), 1)
-        base = self._ryu_base()
-        url = base + f"/stats/flow/{dpid}"
-        self.log_sfc(f"[플로우 조회] GET {url}")
+        url = self._ryu_base() + f"/stats/flow/{dpid}"
 
         try:
             r = requests.get(url, timeout=3)
-            self.log_sfc(f"status={r.status_code}")
+            self.log_sfc(f"status {r.status_code}")
+
             try:
-                self.log_sfc(json.dumps(r.json(), indent=2, ensure_ascii=False))
-            except Exception:
-                self.log_sfc(r.text.strip())
+                data = r.json()
+            except:
+                self.log_sfc(r.text)
+                return
+
+            self._update_sfc_table(data)
+
+            self.log_sfc(json.dumps(data, indent=2, ensure_ascii=False))
+
         except Exception as e:
-            self.log_sfc(f"error: {e}")
+            self.log_sfc(str(e))
+
+    def _update_sfc_table(self, data):
+        for row in self.tbl_sfc.get_children():
+            self.tbl_sfc.delete(row)
+
+        flows = data.get("1", [])
+        for f in flows:
+            pr = f.get("priority", "")
+            mt = json.dumps(f.get("match", {}), ensure_ascii=False)
+            ac = json.dumps(f.get("actions", []), ensure_ascii=False)
+            self.tbl_sfc.insert("", "end", values=(pr, mt, ac))
 
     def sfc_clear(self):
         if requests is None:
-            self.log_sfc("requests 모듈 없음 → pip install requests")
+            self.log_sfc("requests 없음")
             return
 
         dpid = safe_int(self.var_dpid.get(), 1)
-        base = self._ryu_base()
-        url = base + f"/stats/flowentry/clear/{dpid}"
-        self.log_sfc(f"[플로우 삭제] DELETE {url}")
+        url = self._ryu_base() + f"/stats/flowentry/clear/{dpid}"
 
         try:
             r = requests.delete(url, timeout=3)
-            self.log_sfc(f"status={r.status_code}")
-            if r.text:
-                self.log_sfc(r.text.strip())
+            self.log_sfc("[삭제 완료]")
         except Exception as e:
-            self.log_sfc(f"error: {e}")
+            self.log_sfc(str(e))
 
-    def _flow_add(self, dpid: int, prio: int, in_port: int, out_port: int) -> dict:
+    def _flow_add(self, dpid, prio, in_port, out_port):
         return {
             "dpid": dpid,
             "priority": prio,
             "match": {"in_port": in_port},
-            "actions": [{"type": "OUTPUT", "port": out_port}]
+            "actions": [{"type": "OUTPUT", "port": out_port}],
         }
 
-    # ---------------- 공용 ----------------
+    # ---------------- 공용 -------------------
+
     def _append(self, widget, text):
         widget.insert("end", text + "\n")
         widget.see("end")
@@ -872,11 +855,11 @@ class App(tk.Tk):
     def on_close(self):
         try:
             self.server_stop()
-        except Exception:
+        except:
             pass
         try:
             self.cli_close()
-        except Exception:
+        except:
             pass
         self.destroy()
 
