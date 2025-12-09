@@ -6,7 +6,7 @@
 
 ## 실행 방법
 ### 1 Windows(WSL)의 vscode를 기준, 상대 경로는 작성자의 폴더를 기준으로 함
-
+#### 22.04 LTS, 20.04 LTS, python 3.8 버전 사용 
 ```bash
 # 기본 패키지 설치
 Ubuntu에서 code . 으로 vscode 진입.
