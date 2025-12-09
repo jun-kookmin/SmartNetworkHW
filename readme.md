@@ -41,7 +41,7 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 |3|IP 주소 변환 함수|네트워크 진단 탭 `inet_pton/ntop(IPv4)`/`inet_pton/ntop(IPv6)`|V|
 |4|DNS/이름 변환|네트워크 진단 탭 `DNS 조회`, `역방향 조회`|V|
 |5|Server 상태 확인|네트워크 진단 탭 `포트 검사`|V|
-|6|netstat -a -n -p tcp | findstr 9000|네트워크 진단 탭 `netstat 필터`|V|
+|6|netstat -a -n -p tcp findstr 9000|네트워크 진단 탭 `netstat 필터`|V|
 |7|GUI TCP 서버 함수 상태 표시|TCP 서버 탭 `서버 시작`, `서버 종료`|V|
 |8|TCP 클라이언트 함수 상태 표시|TCP 클라이언트 탭 `접속`, `해제`|V|
 |9|소켓 버퍼 상태 표시|버퍼/소켓 탭 `클라 소켓 버퍼 조회`, `임시 소켓 버퍼 조회`|V|
