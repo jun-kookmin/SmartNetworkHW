@@ -57,7 +57,8 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 <img width="2309" height="1607" alt="image" src="https://github.com/user-attachments/assets/a1dbfacb-c5fc-424d-891e-9db97903cf9e" />
 
 ### 2. 바이트 정렬 함수
-<img width="2351" height="1582" alt="image" src="https://github.com/user-attachments/assets/138de91c-398a-467d-bff8-388281cf7b4c" />
+![Uploading image.png…]()
+
 
 ### 3. IP 주소 변환 함수
 <img width="2339" height="1523" alt="image" src="https://github.com/user-attachments/assets/d10a8ac4-7ca7-40a9-96ed-4f0b2edc8d0d" />
