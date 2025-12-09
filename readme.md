@@ -1,4 +1,4 @@
-# 스마트네트워크서비스 AD 과제
+<img width="2343" height="1599" alt="image" src="https://github.com/user-attachments/assets/3a15f578-394d-41df-861e-8986b72c5ff9" /># 스마트네트워크서비스 AD 과제
 
 ## 배경준	20213004	
 ## 하승준	20233114	
@@ -36,7 +36,7 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 ## smartns.py 요구사항 매핑 체크리스트
 | # | 요구 기능 | UI/버튼/탭 매핑 (smartns.py) | 상태 |
 |---|-----|-----|---|
-|1|IP 구성 확인 (ipconfig/ifconfig 자동)|네트워크 진단 탭 `IP 구성 확인` 버튼 → `do_ipconfig` (OS별 분기)|V|
+|1|IP 구성 확인|네트워크 진단 탭 `IP 구성 확인` 버튼 → `do_ipconfig` (OS별 분기)|V|
 |2|바이트 정렬 함수 (host↔network 16/32/64비트)|네트워크 진단 탭 `hton/ntoh 데모` → `do_hton`|V|
 |3|IP 주소 변환 함수 (inet_pton/ntop)|네트워크 진단 탭 `IPv4 변환`/`IPv6 변환` → `do_inet4`, `do_inet6`|V|
 |4|DNS/역방향 이름 변환|네트워크 진단 탭 `DNS 조회`, `역방향 조회` → `do_dns`, `do_reverse`|V|
@@ -109,5 +109,15 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 <img width="3840" height="1960" alt="image" src="https://github.com/user-attachments/assets/65146749-0501-4195-898a-373c90450e7b" />
 <img width="3840" height="1966" alt="image" src="https://github.com/user-attachments/assets/553d2447-5576-4f91-a7ff-200501093ab9" />
 <img width="1328" height="777" alt="image" src="https://github.com/user-attachments/assets/e84606e8-6c05-496c-865d-6c5d455ef7af" />
+
+### 17. Ryu SFC
+<img width="2343" height="1599" alt="image" src="https://github.com/user-attachments/assets/934e4663-2b3e-4b34-b478-a2bb35af41f0" />
+<img width="2345" height="1606" alt="image" src="https://github.com/user-attachments/assets/d0f20073-76b6-45b9-abcf-0fc450251143" />
+<img width="2336" height="1603" alt="image" src="https://github.com/user-attachments/assets/04e47a1f-f307-483d-ab57-1dd59aa6683c" />
+<img width="2337" height="1598" alt="image" src="https://github.com/user-attachments/assets/e6edafe3-b725-4734-b468-b3c9cf03738e" />
+<img width="2341" height="1598" alt="image" src="https://github.com/user-attachments/assets/ecee8eb8-9c7a-4259-b5d0-f006ee769d42" />
+
+
+
 
 
