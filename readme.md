@@ -1,4 +1,4 @@
-<img width="2343" height="1599" alt="image" src="https://github.com/user-attachments/assets/3a15f578-394d-41df-861e-8986b72c5ff9" /># 스마트네트워크서비스 AD 과제
+# 스마트네트워크서비스 AD 과제
 
 ## 배경준	20213004	
 ## 하승준	20233114	
@@ -33,32 +33,31 @@ python3 -m ryu.cmd.manager ryu.app.ofctl_rest ryu.app.simple_switch_13
 sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 ```
 
-## smartns.py 요구사항 매핑 체크리스트
-| # | 요구 기능 | UI/버튼/탭 매핑 (smartns.py) | 상태 |
+## smartns.py 매핑 체크리스트
+| # | 요구 기능 | 동작 확인 | 동작 여부 |
 |---|-----|-----|---|
-|1|IP 구성 확인|네트워크 진단 탭 `IP 구성 확인` 버튼 → `do_ipconfig` (OS별 분기)|V|
-|2|바이트 정렬 함수 (host↔network 16/32/64비트)|네트워크 진단 탭 `hton/ntoh 데모` → `do_hton`|V|
-|3|IP 주소 변환 함수 (inet_pton/ntop)|네트워크 진단 탭 `IPv4 변환`/`IPv6 변환` → `do_inet4`, `do_inet6`|V|
-|4|DNS/역방향 이름 변환|네트워크 진단 탭 `DNS 조회`, `역방향 조회` → `do_dns`, `do_reverse`|V|
-|5|Server 상태 확인 (포트 오픈 검사)|네트워크 진단 탭 `포트 검사` → `do_check_port`|V|
-|6|netstat -a -n -p tcp | findstr/grep 필터|네트워크 진단 탭 `netstat 필터` → `do_netstat` (Windows findstr, Unix grep)|V|
-|7|GUI TCP 서버 상태 표시|TCP 서버 탭: 시작/정지 버튼, 접속 수/카운터 라벨, 로그 창, 이벤트/스레드(`server_stop_event`, `server_lock`) 기반|V|
-|8|TCP 클라이언트 상태 표시|TCP 클라이언트 탭: 접속/해제, 전송모드 선택, 로그 (`cli_connect`, `cli_close`, `_cli_recv_loop`)|V|
-|9|소켓 버퍼 상태 표시|버퍼/소켓 탭 `클라 소켓 버퍼 조회`, `임시 소켓 버퍼 조회` → `buf_client`, `buf_temp` (SO_SNDBUF/SO_RCVBUF)|V|
-|10|네트워크 그림판 (드래그 & 서버 브로드캐스트)|네트워크 그림판 탭: 드래그 이벤트 → `_draw_move`, 서버 브로드캐스트 `_server_draw_broadcast_loop`|V|
-|11|고정길이 전송 (FIXED)|클라이언트 전송모드 `FIXED(32B)` → `cli_send` + `pad_fixed`/서버 `_server_client_loop` `F`|V|
-|12|가변길이 전송 (VAR, \\n 구분)|전송모드 `VAR(\\n)` → `cli_send` `V` + 서버 `_server_client_loop` `VAR` 처리|V|
-|13|고정+가변 전송 (MIX, 4B length prefix)|전송모드 `MIX` → `cli_send` `M` + 서버 `_server_client_loop` `M` 처리|V|
-|14|데이터 전송 후 종료|TCP 클라이언트 탭 `전송 후 종료` 체크 → `cli_send` 내부 `var_after_close`|V|
-|15|멀티 스레드 동작|서버: accept 루프+클라이언트별 스레드 (`_server_accept_loop`, `_server_client_loop`), 공유 카운터 보호|V|
-|16|임계영역/이벤트 연습|`threading.Lock`(`server_lock`)으로 공유카운터/리스트 보호, `threading.Event`(`server_stop_event`, `client_stop_event`)로 안전 종료|V|
+|1|IP 구성 확인|네트워크 진단 탭 `IP 구성 확인` 버튼|V|
+|2|바이트 정렬 함수|네트워크 진단 탭 `hton/ntoh`|V|
+|3|IP 주소 변환 함수|네트워크 진단 탭 `inet_pton/ntop(IPv4)`/`inet_pton/ntop(IPv6)`|V|
+|4|DNS/이름 변환|네트워크 진단 탭 `DNS 조회`, `역방향 조회`|V|
+|5|Server 상태 확인|네트워크 진단 탭 `포트 검사`|V|
+|6|netstat -a -n -p tcp | findstr 9000|네트워크 진단 탭 `netstat 필터`|V|
+|7|GUI TCP 서버 함수 상태 표시|TCP 서버 탭 `서버 시작`, `서버 종료`|V|
+|8|TCP 클라이언트 함수 상태 표시|TCP 클라이언트 탭 `접속`, `해제`|V|
+|9|소켓 버퍼 상태 표시|버퍼/소켓 탭 `클라 소켓 버퍼 조회`, `임시 소켓 버퍼 조회`|V|
+|10|네트워크 그림판|네트워크 그림판 탭 드래그|V|
+|11|고정길이 전송 (FIXED)|TCP 클라이언트 탭 `FIXED(32B)`, `전송`|V|
+|12|가변길이 전송 (VAR)|TCP 클라이언트 탭 `VAR(\n)`, `전송`|V|
+|13|고정+가변 전송 (MIX)|TCP 클라이언트 탭 `MIX`, `전송`|V|
+|14|데이터 전송 후 종료|TCP 클라이언트 탭 `전송 후 종료` 체크|V|
+|15|멀티 스레드 동작|클라이언트별 스레드 `th = threading.Thread(target=self._server_client_loop, args=(cli, addr), daemon=True)`|V|
+|16|임계영역/이벤트|`threading.Lock`으로 공유카운터/리스트 보호, `threading.Event`로 안전 종료|V|
 
 ### 1. IP 구성 확인
 <img width="2309" height="1607" alt="image" src="https://github.com/user-attachments/assets/a1dbfacb-c5fc-424d-891e-9db97903cf9e" />
 
 ### 2. 바이트 정렬 함수
-![Uploading image.png…]()
-
+<img width="2346" height="1601" alt="image" src="https://github.com/user-attachments/assets/6cd178f8-9286-4243-bf0a-ebdd072f6344" />
 
 ### 3. IP 주소 변환 함수
 <img width="2339" height="1523" alt="image" src="https://github.com/user-attachments/assets/d10a8ac4-7ca7-40a9-96ed-4f0b2edc8d0d" />
@@ -104,6 +103,7 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 <img width="2330" height="1601" alt="image" src="https://github.com/user-attachments/assets/02de5471-40bb-45b3-b117-c76f521d4fea" />
 
 ### 15. 멀티 스레드 동작
+<img width="1469" height="114" alt="image" src="https://github.com/user-attachments/assets/290b8260-d307-44f1-a68c-2a92c0928f65" />
 <img width="2875" height="1697" alt="image" src="https://github.com/user-attachments/assets/72b4ff9c-6f1a-4a00-952f-4a974d490e94" />
 
 ### 16. 임계영역/이벤트 연습
