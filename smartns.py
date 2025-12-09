@@ -83,7 +83,7 @@ class ClientConn:
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("스마트 네트워크 서비스")
+        self.title("스마트 네트워크 서비스 AD 프로젝트 - 김도경, 배경준, 하승준")
         self.geometry("1180x780")
 
         self.server_running = False
@@ -144,18 +144,18 @@ class App(tk.Tk):
 
         ttk.Separator(left).pack(fill="x", pady=6)
         ttk.Label(left, text="바이트/주소 변환").pack(anchor="w")
-        ttk.Button(left, text="hton/ntoh 데모", command=self.do_hton).pack(fill="x", pady=2)
+        ttk.Button(left, text="hton/ntoh", command=self.do_hton).pack(fill="x", pady=2)
 
         self.var_ipv4 = tk.StringVar(value="8.8.8.8")
         self.var_ipv6 = tk.StringVar(value="2001:4860:4860::8888")
 
         row3 = ttk.Frame(left); row3.pack(fill="x")
         ttk.Entry(row3, textvariable=self.var_ipv4, width=18).pack(side="left")
-        ttk.Button(row3, text="IPv4 변환", command=self.do_inet4).pack(side="left", padx=4)
+        ttk.Button(row3, text="inet_pton/ntop(IPv4)", command=self.do_inet4).pack(side="left", padx=4)
 
         row4 = ttk.Frame(left); row4.pack(fill="x")
         ttk.Entry(row4, textvariable=self.var_ipv6, width=26).pack(side="left")
-        ttk.Button(row4, text="IPv6 변환", command=self.do_inet6).pack(side="left", padx=4)
+        ttk.Button(row4, text="inet_pton/ntop(IPv6)", command=self.do_inet6).pack(side="left", padx=4)
 
         ttk.Separator(left).pack(fill="x", pady=6)
         ttk.Label(left, text="DNS/역방향 조회").pack(anchor="w")
@@ -204,7 +204,7 @@ class App(tk.Tk):
         port = safe_int(self.var_port.get(), 0)
         try:
             with socket.create_connection((host, port), timeout=2):
-                self.log_diag("OPEN")
+                self.log_diag("OPEN (연결 성공)")
         except Exception as e:
             self.log_diag(f"CLOSED: {e}")
 
@@ -257,7 +257,6 @@ class App(tk.Tk):
         try:
             name, alias, addr = socket.gethostbyaddr(ip)
             self.log_diag(f"name={name}")
-            self.log_diag(f"alias={alias}")
             self.log_diag(f"addr={addr}")
         except Exception as e:
             self.log_diag(str(e))
@@ -550,7 +549,7 @@ class App(tk.Tk):
                     continue
 
         except Exception as e:
-            self.log_cli(f"[오류] {e}")
+            self.log_cli(f"{e}")
 
         finally:
             self.log_cli("[수신 종료]")
