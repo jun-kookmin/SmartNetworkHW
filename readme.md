@@ -63,7 +63,9 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 <img width="2339" height="1523" alt="image" src="https://github.com/user-attachments/assets/d10a8ac4-7ca7-40a9-96ed-4f0b2edc8d0d" />
 
 ### 4. DNS와 이름 변환
-<img width="2340" height="1605" alt="image" src="https://github.com/user-attachments/assets/4213e663-03fd-4b04-93d8-8a6316271944" />
+<img width="2342" height="1527" alt="image" src="https://github.com/user-attachments/assets/f71d0810-5c36-4d05-8050-b5cff8705ca7" />
+<img width="2333" height="1526" alt="image" src="https://github.com/user-attachments/assets/ac315884-4ca5-4434-9837-5bc97b0fbe92" />
+
 
 ### 5. Server 상태 확인
 <img width="2339" height="1598" alt="image" src="https://github.com/user-attachments/assets/48f25a71-ac03-4345-9037-fece4020486c" />
