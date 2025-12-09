@@ -92,16 +92,20 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 <img width="2352" height="1610" alt="image" src="https://github.com/user-attachments/assets/64208e19-94c8-4f40-bdbc-e9e614a53161" />
 
 ### 11. 고정길이 전송
-<img width="2356" height="1526" alt="image" src="https://github.com/user-attachments/assets/5fe59ab5-50dc-4763-b01e-86a45234b043" />
+<img width="2354" height="1522" alt="image" src="https://github.com/user-attachments/assets/fe6f6469-3676-46d7-b7b7-14b3e085036c" />
+
 
 ### 12. 가변길이 전송
-<img width="2339" height="1605" alt="image" src="https://github.com/user-attachments/assets/c61cc480-86ba-43cd-9673-8aa5c7ed91ea" />
+<img width="2353" height="1525" alt="image" src="https://github.com/user-attachments/assets/af43791b-1816-4ed9-8361-ad61ecef25e9" />
+
 
 ### 13. 고정+가변 전송
-<img width="2344" height="1582" alt="image" src="https://github.com/user-attachments/assets/e4785cdb-e807-4e84-840b-474aaecde0db" />
+<img width="2340" height="1523" alt="image" src="https://github.com/user-attachments/assets/02d3f686-4e07-49ad-9588-99f94dcba05d" />
+
 
 ### 14. 데이터 전송 후 종료
-<img width="2330" height="1601" alt="image" src="https://github.com/user-attachments/assets/02de5471-40bb-45b3-b117-c76f521d4fea" />
+<img width="2339" height="1527" alt="image" src="https://github.com/user-attachments/assets/eb89ec6f-ab5d-47d3-8c28-8613f7d63db9" />
+
 
 ### 15. 멀티 스레드 동작
 <img width="1469" height="114" alt="image" src="https://github.com/user-attachments/assets/290b8260-d307-44f1-a68c-2a92c0928f65" />
