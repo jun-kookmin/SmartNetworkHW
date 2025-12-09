@@ -103,4 +103,8 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 <img width="2875" height="1697" alt="image" src="https://github.com/user-attachments/assets/72b4ff9c-6f1a-4a00-952f-4a974d490e94" />
 
 ### 16. 임계영역/이벤트 연습
-<img width="1422" height="592" alt="image" src="https://github.com/user-attachments/assets/70c0d8d0-536d-4228-902a-5fdb16fa86b6" />
+<img width="3840" height="1960" alt="image" src="https://github.com/user-attachments/assets/65146749-0501-4195-898a-373c90450e7b" />
+<img width="3840" height="1966" alt="image" src="https://github.com/user-attachments/assets/553d2447-5576-4f91-a7ff-200501093ab9" />
+<img width="1328" height="777" alt="image" src="https://github.com/user-attachments/assets/e84606e8-6c05-496c-865d-6c5d455ef7af" />
+
+
