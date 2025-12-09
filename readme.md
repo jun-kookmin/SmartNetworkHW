@@ -8,9 +8,9 @@
 ### 1 Windows(WSL)의 vscode를 기준, 상대 경로는 작성자의 폴더를 기준으로 함
 #### 22.04 LTS, 20.04 LTS, python 3.8 버전 사용 
 ```bash
-# 기본 패키지 설치
 Ubuntu에서 `code .` 으로 vscode 진입.
 
+# 기본 패키지 설치
 sudo apt update
 sudo apt install -y python3 python3-venv python3-pip mininet curl
 
@@ -22,6 +22,7 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install ryu requests eventlet
 
+# mininet 설치 
 git clone https://github.com/mininet/mininet.git
 cd mininet
 sudo ./util/install.sh -a
