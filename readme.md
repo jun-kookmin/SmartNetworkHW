@@ -57,16 +57,17 @@ sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
 <img width="2309" height="1607" alt="image" src="https://github.com/user-attachments/assets/a1dbfacb-c5fc-424d-891e-9db97903cf9e" />
 
 ### 2. 바이트 정렬 함수
-<img width="2339" height="1523" alt="image" src="https://github.com/user-attachments/assets/d10a8ac4-7ca7-40a9-96ed-4f0b2edc8d0d" />
+<img width="2351" height="1582" alt="image" src="https://github.com/user-attachments/assets/138de91c-398a-467d-bff8-388281cf7b4c" />
 
 ### 3. IP 주소 변환 함수
-<img width="2351" height="1582" alt="image" src="https://github.com/user-attachments/assets/138de91c-398a-467d-bff8-388281cf7b4c" />
+<img width="2339" height="1523" alt="image" src="https://github.com/user-attachments/assets/d10a8ac4-7ca7-40a9-96ed-4f0b2edc8d0d" />
 
 ### 4. DNS와 이름 변환
 <img width="2340" height="1605" alt="image" src="https://github.com/user-attachments/assets/4213e663-03fd-4b04-93d8-8a6316271944" />
 
 ### 5. Server 상태 확인
-<img width="2338" height="1609" alt="image" src="https://github.com/user-attachments/assets/f22b69f1-6a5e-4698-8cb1-586017d074e8" />
+<img width="2339" height="1598" alt="image" src="https://github.com/user-attachments/assets/48f25a71-ac03-4345-9037-fece4020486c" />
+
 
 ### 6. netstat -a -n -p tcp | findstr 9000
 <img width="2336" height="1529" alt="image" src="https://github.com/user-attachments/assets/735b8197-b131-44b7-b725-71a2a0e759e8" />
