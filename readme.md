@@ -9,7 +9,7 @@
 #### 22.04 LTS, 20.04 LTS, python 3.8 버전 사용 
 ```bash
 # 기본 패키지 설치
-Ubuntu에서 code . 으로 vscode 진입.
+Ubuntu에서 `code .` 으로 vscode 진입.
 
 sudo apt update
 sudo apt install -y python3 python3-venv python3-pip mininet curl
