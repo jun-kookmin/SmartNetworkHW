@@ -32,6 +32,8 @@ python3 -m ryu.cmd.manager ryu.app.ofctl_rest ryu.app.simple_switch_13
 
 # 5. Mininet 스위치 실행 / 별도 터미널, 같은 venv 상태에서 동작 권장
 sudo mn --controller=remote,ip=127.0.0.1,port=6633 --topo=linear,4
+
+서버만 키고 window vsc에서 smartns.py 파일 실행 
 ```
 
 ## smartns.py 매핑 체크리스트
